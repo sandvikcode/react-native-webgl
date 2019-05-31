@@ -787,7 +787,14 @@ private:
     return nullptr;
   }
 
-  _WRAP_METHOD_UNIMPL(framebufferRenderbuffer)
+  _WRAP_METHOD(framebufferRenderbuffer, 4) {
+	  JS_UNPACK_ARGV(GLenum target, GLenum attachment, GLenum renderbuffertarget, RNWebGLTextureId fRenderbuffer);
+    addToNextBatch([=] {
+      auto obj = lookupObject(fRenderbuffer);
+      glFramebufferRenderbuffer(target, attachment, renderbuffertarget, obj);
+    });
+    return nullptr;
+  }
 
   _WRAP_METHOD(framebufferTexture2D, 5) {
     JS_UNPACK_ARGV(GLenum target, GLenum attachment, GLenum textarget, RNWebGLTextureId fTexture, GLint level);
@@ -824,13 +831,11 @@ private:
   // -------------
 
   _WRAP_METHOD(bindRenderbuffer, 2) {
-    JS_UNPACK_ARGV(GLenum target);
-    if (JSValueIsNull(jsCtx, jsArgv[1])) {
-      addToNextBatch([=] { glBindRenderbuffer(target, 0); });
-    } else {
-      RNWebGLTextureId fRenderBuffer = JSValueToNumberFast(jsCtx, jsArgv[1]);
-      addToNextBatch([=] { glBindRenderbuffer(target, lookupObject(fRenderBuffer)); });
-    }
+    JS_UNPACK_ARGV(GLenum target, RNWebGLTextureId fRenderbuffer);
+    addToNextBatch([=] {
+      GLuint obj = lookupObject(fRenderbuffer);
+      glBindRenderbuffer(target, obj);
+    });
     return nullptr;
   }
 
@@ -855,7 +860,13 @@ private:
   
   _WRAP_METHOD_IS_OBJECT(Renderbuffer)
 
-  _WRAP_METHOD_UNIMPL(renderbufferStorage)
+  _WRAP_METHOD(renderbufferStorage, 4) {
+    JS_UNPACK_ARGV(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+    addToNextBatch([=]{
+      glRenderbufferStorage(target, internalformat, width, height);
+    });
+   return nullptr;
+  }
 
 
   // Textures
