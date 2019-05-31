@@ -823,14 +823,36 @@ private:
   // Renderbuffers
   // -------------
 
-  _WRAP_METHOD_UNIMPL(bindRenderbuffer)
+  _WRAP_METHOD(bindRenderbuffer, 2) {
+    JS_UNPACK_ARGV(GLenum target);
+    if (JSValueIsNull(jsCtx, jsArgv[1])) {
+      addToNextBatch([=] { glBindRenderbuffer(target, 0); });
+    } else {
+      RNWebGLTextureId fRenderBuffer = JSValueToNumberFast(jsCtx, jsArgv[1]);
+      addToNextBatch([=] { glBindRenderbuffer(target, lookupObject(fRenderBuffer)); });
+    }
+    return nullptr;
+  }
 
-  _WRAP_METHOD_UNIMPL(createRenderbuffer)
+  _WRAP_METHOD(createRenderbuffer, 0) {
+    return addFutureToNextBatch(jsCtx, [] {
+      GLuint renderbuffer;
+      glGenRenderbuffers(1, &renderbuffer);
+      return renderbuffer;
+    });
+  }
 
-  _WRAP_METHOD_UNIMPL(deleteRenderbuffer)
+  _WRAP_METHOD(deleteRenderbuffer, 1) {
+    JS_UNPACK_ARGV(RNWebGLTextureId fRenderbuffer);
+    addToNextBatch([=] {
+      GLuint renderbuffer = lookupObject(fRenderbuffer);
+      glDeleteFramebuffers(1, &renderbuffer);
+    });
+    return nullptr;
+  }
 
   _WRAP_METHOD_UNIMPL(getRenderbufferParameter)
-
+  
   _WRAP_METHOD_IS_OBJECT(Renderbuffer)
 
   _WRAP_METHOD_UNIMPL(renderbufferStorage)
